@@ -7,10 +7,10 @@ import HandoverModal from './components/HandoverModal';
 import ShiftHandoverCheckModal from './components/ShiftHandoverCheckModal';
 import WarningModal from './components/WarningModal';
 import { WEEKDAY_REMINDERS, SHIFT_SETTINGS, COMMON_A_OPTIONS, COMMON_R_OPTIONS, COMMON_D_OBSERVATIONS, NANDA_FOCUS_DATA, MSE_COMMON_DATA, RELATION_OPTIONS, OTHER_SYMPTOM_SUBTYPES } from './constants';
-import { ShiftType, ExamItem } from './types';
+import { ShiftType, ExamItem, HandoverItem } from './types';
 import { polishNursingNote, suggestNursingActions } from './services/geminiService';
 
-const PsychNursingProV41_8 = () => {
+const PsychNursingProV41_9 = () => {
   const [selectedFocus, setSelectedFocus] = useState('discharge_planning');
   const [selectedMSE, setSelectedMSE] = useState<string[]>([]);
   const [selectedSubjective, setSelectedSubjective] = useState<string[]>([]);
@@ -37,7 +37,8 @@ const PsychNursingProV41_8 = () => {
   const [showShiftHandoverModal, setShowShiftHandoverModal] = useState(false); 
   
   const [currentShift, setCurrentShift] = useState<ShiftType>('A');
-  const [handoverList, setHandoverList] = useState([
+  // 明確指定 HandoverItem[] 型別
+  const [handoverList, setHandoverList] = useState<HandoverItem[]>([
       { id: 1, bed: '', record: 0, assess: 0, observe: 0, pain: 0, painValue: '', reminder: '', reminderTime: '', alerted: false },
       { id: 2, bed: '', record: 0, assess: 0, observe: 0, pain: 0, painValue: '', reminder: '', reminderTime: '', alerted: false },
       { id: 3, bed: '', record: 0, assess: 0, observe: 0, pain: 0, painValue: '', reminder: '', reminderTime: '', alerted: false },
@@ -187,9 +188,8 @@ const PsychNursingProV41_8 = () => {
         else if (otherSymptomType === 'colonoscopy') baseD = `病人預計${colonoscopyDate ? colonoscopyDate.split('-').slice(1).join('月') + '日' : '○○月○○日'}${colonoscopyTime ? formatTimeForDoc(colonoscopyTime) : '○○：○○'}做大腸內視鏡檢查。`;
         else baseD = subtypeData?.d_template || "";
     } else if (['admission_care', 'restraint_limbs'].includes(selectedFocus)) {
-        return; // 這兩項由 addText 處理或獨立邏輯，不透過此通用 Effect 產生完整 D
+        return; 
     } else {
-        // 通用 NANDA 焦點與評估
         let dSegments: string[] = [];
         let obsPart = "予以觀察下，病人";
         
@@ -228,7 +228,6 @@ const PsychNursingProV41_8 = () => {
             dSegments.push(subPart);
         }
         
-        // 修正標點：中間以逗號隔開，末尾加句號
         baseD = dSegments.join('，').replace(/，，/g, '，').trim();
         if (baseD && !baseD.endsWith('。')) baseD += "。";
     }
@@ -268,17 +267,21 @@ const PsychNursingProV41_8 = () => {
               let cleanContent = content.replace(/。$/, '').trim();
               let cleanText = text.replace(/。$/, '').trim();
               if (cleanContent.includes(cleanText)) {
-                  // 移除邏輯
                   let newContent = cleanContent.replace(new RegExp(`${cleanText}[，]?`, 'g'), '').replace(/，$/g, '').trim();
                   return { ...prev, D: newContent ? newContent + "。" : "" };
               } else {
-                  // 新增邏輯
                   let newContent = cleanContent ? `${cleanContent}，${cleanText}` : cleanText;
                   return { ...prev, D: newContent + "。" };
               }
           }
           if (selectedFocus === 'admission_care') return { ...prev, D: content === text ? '' : text }; 
-          return { ...prev, D: content.includes(text) ? content : `${content}\n${text}` };
+          
+          // 通用 D 邏輯：內部逗號，末尾句號
+          let cleanContent = content.replace(/[。]$/, '').trim();
+          let cleanText = text.replace(/[。]$/, '').trim();
+          if (cleanContent.includes(cleanText)) return prev;
+          let newContent = cleanContent ? `${cleanContent}，${cleanText}` : cleanText;
+          return { ...prev, D: newContent + "。" };
       }
       return { ...prev, [f]: content.includes(text) ? content : `${content}\n${text}` };
     });
@@ -330,7 +333,7 @@ const PsychNursingProV41_8 = () => {
           <div className="px-6 py-3 flex items-center justify-between gap-6">
             <div className="flex items-center gap-3 shrink-0">
                 <div className="bg-gradient-to-tr from-green-400 to-teal-500 p-2 rounded-xl shadow-lg shadow-green-500/20"><Stethoscope className="text-white w-6 h-6" /></div>
-                <div><h1 className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600 hidden md:block">精神科護理通</h1><span className="text-[10px] font-bold tracking-widest uppercase text-slate-400 hidden md:block">Pro V41.8 れんと</span></div>
+                <div><h1 className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600 hidden md:block">精神科護理通</h1><span className="text-[10px] font-bold tracking-widest uppercase text-slate-400 hidden md:block">Pro V41.9 れんと</span></div>
             </div>
             <div className="flex items-center gap-3 flex-grow max-w-2xl min-w-0">
                 <div className="relative flex-grow">
@@ -465,4 +468,4 @@ const PsychNursingProV41_8 = () => {
   );
 };
 
-export default PsychNursingProV41_8;
+export default PsychNursingProV41_9;

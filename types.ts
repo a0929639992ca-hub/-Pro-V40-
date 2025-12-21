@@ -8,7 +8,7 @@ export interface HandoverItem {
     assess: number;
     observe: number;
     pain: number;
-    painValue?: string; // 新增疼痛文字輸入
+    painValue: string; // 修正為 string，不再是 optional，確保型別一致性
     reminder: string;
     reminderTime: string;
     alerted: boolean;

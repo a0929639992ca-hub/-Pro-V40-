@@ -1,7 +1,7 @@
+
 import { GoogleGenAI } from "@google/genai";
 
 const apiKey = process.env.API_KEY || '';
-// We won't throw error immediately if missing to allow UI to load, but functionality will fail gracefully.
 const ai = new GoogleGenAI({ apiKey });
 
 export const polishNursingNote = async (text: string, type: 'D' | 'A' | 'R' | 'T'): Promise<string> => {
@@ -15,7 +15,7 @@ export const polishNursingNote = async (text: string, type: 'D' | 'A' | 'R' | 'T
         Refined Text (Just the text):`;
 
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-3-flash-preview',
             contents: prompt,
         });
         return response.text?.trim() || text;
@@ -32,7 +32,7 @@ export const suggestNursingActions = async (focus: string, subjectiveData: strin
         Example: ["主動傾聽病人感受", "評估自殺風險", "衛教藥物副作用"]`;
 
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-3-flash-preview',
             contents: prompt,
             config: {
                 responseMimeType: "application/json"
