@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Sun, Sunset, Moon as MoonIcon } from 'lucide-react';
 import { NandaFocus, MseCategory, ShiftSetting, ShiftType } from './types';
@@ -134,8 +135,8 @@ export const NANDA_FOCUS_DATA: Record<string, NandaFocus> = {
         teachings: ['向家屬解釋約束之目的與保護性質。', '指導家屬協助病人肢體活動之技巧。'] 
     },
     thought_process: { label: '思考過程失調', subjective_tags: [{ id: 'sub_th_del', text: '我是美國總統，FBI都在追我(誇大/被害)' }, { id: 'sub_th_broad', text: '我的想法都被廣播出來了' }, { id: 'sub_th_control', text: '大腦被外星人控制植入晶片' }, { id: 'sub_th_loose', text: '講話跳躍，無法對焦' }], actions: ['提供現實導向，不與其爭辯妄想內容的真實性。', '以具體、簡短的語句溝通，避免過度抽象。', '建立規律作息，減少環境中的混亂刺激。', '依醫囑給予抗精神病藥物，並確認藥物確實吞服。'], responses: ['暫無觀察病人有自語及自笑之情形', '續觀病人精神症狀', '班內否認有症狀干擾', '現續觀察病人之精神症狀', '能暫時轉移注意力參與活動，減少談論妄想內容', '雖仍有怪異想法，但情緒受影響程度減輕', '言語表達較切題，能回答簡單生活問題', '能區辨「這是我的想法」與「現實狀況」的差異'], teachings: ['衛教按時服藥對穩定腦部內分泌的重要性。', '指導現實感測試技巧(向信任的人核對)。'] },
-    sensory_perception: { label: '感覺/知覺異常', subjective_tags: [{ id: 'sub_sen_voice', text: '你有聽到那個罵我的聲音嗎？' }, { id: 'sub_sen_bug', text: '牆上有蟲在爬/身上有蟲' }, { id: 'sub_sen_smell', text: '這裡有毒氣的味道' }, { id: 'sub_sen_cmd', text: '聲音叫我不要吃藥' }], actions: ['評估幻覺內容(特別是命令式幻聽)及危險性。', '適時呈現現實原則：「我沒聽到聲音，但我知道你很困擾。」', '減少環境噪音刺激，安排安靜的休息空間。', '觀察幻覺出現頻率，介入干擾技巧(如對話)。'], responses: ['暫無觀察病人有自語及自笑之情形', '續觀病人精神症狀', '班內否認有症狀干擾', '現續觀察病人之精神症狀', '表示聲音變小了，受干擾程度降低', '能分辨聲音是症狀表現，未受其指令行事', '能運用聽音樂方式轉移幻覺注意力', '自言自語行為減少，能專注於當下活動'], teachings: ['教導干擾幻聽的技巧(如大聲朗讀、聽音樂、告訴聲音走開)。', '強調藥物治療對控制幻覺的重要性。'] },
-    ineffective_coping: { label: '因應能力失調-個人', subjective_tags: [{ id: 'sub_cop_drug', text: '一煩我就想吸毒/喝酒' }, { id: 'sub_cop_giveup', text: '我不知道該怎麼辦，隨便啦' }, { id: 'sub_cop_manip', text: '你不給我打電話我就不吃藥' }], actions: ['協助病人辨識引發壓力的情境與誘發因子。', '討論過去失敗的因應方式(如物質濫用)及其後果。', '設定行為契約，對正向行為給予增強，忽略操控行為。', '鼓勵並引導嘗試新的壓力調適策略(如運動、書寫)。'], responses: ['能說出兩種正向的壓力調適方法', '面對挫折時未出現衝動行為，能主動求助', '願意配合治療計畫，減少討價還價的操控行為'], teachings: ['教導問題解決步驟(確認問題->列出方案->評估後果)。', '指導壓力管理與情緒宣洩的合宜方式。'] },
+    sensory_perception: { label: '感覺/知覺異常', subjective_tags: [{ id: 'sub_sen_voice', text: '你有聽到那個罵我的聲音嗎？' }, { id: 'sub_sen_bug', text: '牆上有蟲在爬/身上有蟲' }, { id: 'sub_sen_smell', text: '這裡有毒氣的味道' }, { id: 'sub_sen_cmd', text: '聲音叫我不要吃藥' }], actions: ['評估幻覺內容(特別是命令式幻聽)及危慮性。', '適時呈現現實原則：「我沒聽到聲音，但我知道你很困擾。」', '減少環境噪音刺激，安排安靜的休息空間。', '觀察幻覺出現頻率，介入干擾技巧(如對話)。'], responses: ['暫無觀察病人有自語及自笑之情形', '續觀病人精神症狀', '班內否認有症狀干擾', '現續觀察病人之精神症狀', '表示聲音變小了，受干擾程度降低', '能分辨聲音是症狀表現，未受其指令行事', '能運用聽音樂方式轉移幻覺注意力', '自言自語行為減少，能專注於當下活動'], teachings: ['教導干擾幻聽的技巧(如大聲朗讀、聽音樂、告訴聲音走開)。', '強調藥物治療對控制幻覺的重要性。'] },
+    ineffective_coping: { label: '因應能力失調-個人', subjective_tags: [{ id: 'sub_cop_drug', text: '一煩我就想吸毒/喝酒' }, { id: 'sub_cop_giveup', text: '我不知道該怎麼辦，隨便啦' }, { id: 'sub_cop_manip', text: '你不給我打電話我就不吃藥' }], actions: ['協助病人辨識引發壓力的情境與誘發因子。', '討論過去失敗的因應方式(如物質濫用)及其後果。', '設定行為契約，對正向行為給予增強，忽略操控行為。', '鼓勵並引導嘗試新的壓力調適策略(如運動、書寫)。'], responses: ['能說出兩種正向的壓力調試方法', '面對挫折時未出現衝動行為，能主動求助', '願意配合治療計畫，減少討價還價的操控行為'], teachings: ['教導問題解決步驟(確認問題->列出方案->評估後果)。', '指導壓力管理與情緒宣洩的合宜方式。'] },
     sleep_pattern: {
         label: '睡眠型態改變',
         d_options: ['病人於○○：○○入睡', '無夜眠中斷', '夜眠中斷1次', '夜眠中斷時多於房內躺床', '可入睡至○○：○○晨醒', '可再度躺床至○○：○○晨醒', '可再躺床至○○：○○早醒', '觀其病人早醒時', '夜眠總時數8.5小時'],
@@ -225,12 +226,107 @@ export const NANDA_FOCUS_DATA: Record<string, NandaFocus> = {
 };
 
 export const MSE_COMMON_DATA: Record<string, MseCategory> = {
-    affect: { title: '情緒', tags: [{ id: 'af_spirit', text: '精神可' }, { id: 'af_control', text: '情緒尚可自控' }, { id: 'af1', text: '情緒平穩' }, { id: 'af2', text: '情緒焦慮' }, { id: 'af3', text: '易怒' }, { id: 'af4', text: '表情淡漠' }, { id: 'af5', text: '起伏不定' }, { id: 'af6', text: '高昂欣快' }, { id: 'af7', text: '低落憂鬱' }] },
-    appearance: { title: '外觀', tags: [{ id: 'ap1', text: '外觀整潔' }, { id: 'ap2', text: '衣著合宜' }, { id: 'ap3', text: '蓬頭垢面' }, { id: 'ap4', text: '身上有異味' }, { id: 'ap5', text: '目光接觸佳' }, { id: 'ap6', text: '目光迴避' }, { id: 'ap7', text: '眼神敵意' }, { id: 'ap8', text: '穿著怪異' }] },
-    behavior: { title: '行為', tags: [{ id: 'be1', text: '行為適切' }, { id: 'be2', text: '態度合作' }, { id: 'be3', text: '激躁不安' }, { id: 'be4', text: '來回踱步' }, { id: 'be5', text: '社交退縮' }, { id: 'be6', text: '自言自語' }, { id: 'be7', text: '傻笑' }, { id: 'be8', text: '攻擊行為' }, { id: 'be9', text: '防衛多疑' }] },
-    speech: { title: '言談', tags: [{ id: 'sp1', text: '言談切題' }, { id: 'sp2', text: '多話急促' }, { id: 'sp3', text: '語無倫次' }, { id: 'sp4', text: '聯想鬆散' }, { id: 'sp5', text: '音量大' }, { id: 'sp6', text: '緘默不語' }, { id: 'sp7', text: '內容受妄想影響' }] },
-    nutrition: { title: '營養', tags: [{ id: 'nut1', text: '食慾可/佳' }, { id: 'nut2_1', text: '院內便當吃全' }, { id: 'nut2_2', text: '院內便當吃1/2' }, { id: 'nut2_3', text: '院內便當吃1/3' }, { id: 'nut2_4', text: '院內便當吃2/3' }, { id: 'nut2_5', text: '院內便當僅吃菜' }, { id: 'nut2_6', text: '院內便當飯吃1/2' }, { id: 'nut3', text: '午/晚餐時，可與其他病友於大廳用餐' }, { id: 'nut4', text: '午/晚餐時，多獨自於房內用餐' }] },
-    social: { title: '社交', tags: [{ id: 'soc5', text: '多於大廳活動' }, { id: 'soc6', text: '多於房內躺床' }, { id: 'soc1', text: '可與其他病友互動，互動合宜' }, { id: 'soc2', text: '少與其他病友互動，多獨自於房內活動' }, { id: 'soc3', text: '可參與職能活動' }, { id: 'soc4', text: '可參與早/午操活動' }] }
+    affect: { 
+        title: '情緒', 
+        tags: [
+            { id: 'af_spirit', text: '精神可' }, 
+            { id: 'af_control', text: '情緒尚可自控' }, 
+            { id: 'af1', text: '情緒平穩' }, 
+            { id: 'af_pleasant', text: '情緒愉悅' },
+            { id: 'af_high', text: '情緒顯高昂' },
+            { id: 'af_volatile', text: '情緒起伏大' },
+            { id: 'af_easy_volatile', text: '情緒易起伏' },
+            { id: 'af2', text: '情緒焦慮' }, 
+            { id: 'af3', text: '易怒' }, 
+            { id: 'af_flat', text: '表情平板' },
+            { id: 'af4', text: '表情淡漠狀' }, 
+            { id: 'af_apathetic_state', text: '表情淡漠狀' },
+            { id: 'af_relaxed', text: '表情放鬆' },
+            { id: 'af_smile', text: '有社交性笑容' },
+            { id: 'af5', text: '起伏不定' }, 
+            { id: 'af6', text: '高昂欣快' }, 
+            { id: 'af7', text: '低落憂鬱' }
+        ] 
+    },
+    appearance: { 
+        title: '外觀', 
+        tags: [
+            { id: 'ap1', text: '外觀整潔' }, 
+            { id: 'ap2', text: '衣著合宜' }, 
+            { id: 'ap3', text: '蓬頭垢面' }, 
+            { id: 'ap_messy_table', text: '床旁桌凌亂' },
+            { id: 'ap_messy_bed', text: '床上凌亂' },
+            { id: 'ap4', text: '身上有異味' }, 
+            { id: 'ap5', text: '目光接觸佳' }, 
+            { id: 'ap6', text: '目光迴避' }, 
+            { id: 'ap7', text: '眼神敵意' }, 
+            { id: 'ap8', text: '穿著怪異' }
+        ] 
+    },
+    behavior: { 
+        title: '行為', 
+        tags: [
+            { id: 'be1', text: '行為適切' }, 
+            { id: 'be2', text: '態度合作' }, 
+            { id: 'be_poor_attention', text: '注意力差' },
+            { id: 'be_distractible', text: '注意力易分散' },
+            { id: 'be3', text: '激躁不安' }, 
+            { id: 'be4', text: '來回踱步' }, 
+            { id: 'be5', text: '社交退縮' }, 
+            { id: 'be6', text: '自言自語' }, 
+            { id: 'be7', text: '傻笑' }, 
+            { id: 'be_bizarre', text: '怪異行為多' },
+            { id: 'be8', text: '攻擊行為' }, 
+            { id: 'be9', text: '防衛多疑' }
+        ] 
+    },
+    speech: { 
+        title: '言談', 
+        tags: [
+            { id: 'sp1', text: '言談切題' }, 
+            { id: 'sp_jumping', text: '對答時思考跳躍' },
+            { id: 'sp_loose', text: '言談鬆散' },
+            { id: 'sp2', text: '多話急促' }, 
+            { id: 'sp_grandiose', text: '內容誇大' },
+            { id: 'sp_self_talk', text: '自語明顯' },
+            { id: 'sp_self_laugh', text: '偶有自笑情形' },
+            { id: 'sp3', text: '語無倫次' }, 
+            { id: 'sp4', text: '聯想鬆散' }, 
+            { id: 'sp5', text: '音量大' }, 
+            { id: 'sp6', text: '緘默不語' }, 
+            { id: 'sp7', text: '內容受妄想影響' }
+        ] 
+    },
+    nutrition: { 
+        title: '營養', 
+        tags: [
+            { id: 'nut_ok', text: '食慾可' },
+            { id: 'nut_good', text: '食慾佳' },
+            { id: 'nut2_1', text: '院內便當吃全' }, 
+            { id: 'nut2_2', text: '院內便當吃1/2' }, 
+            { id: 'nut2_3', text: '院內便當吃1/3' }, 
+            { id: 'nut2_4', text: '院內便當吃2/3' }, 
+            { id: 'nut2_5', text: '院內便當僅吃菜' }, 
+            { id: 'nut2_6', text: '院內便當飯吃1/2' }, 
+            { id: 'nut3_lunch', text: '午餐時，可與其他病友於大廳用餐' }, 
+            { id: 'nut3_dinner', text: '晚餐時，可與其他病友於大廳用餐' }, 
+            { id: 'nut4_lunch', text: '午餐時，多獨自於房內用餐' },
+            { id: 'nut4_dinner', text: '晚餐時，多獨自於房內用餐' }
+        ] 
+    },
+    social: { 
+        title: '社交', 
+        tags: [
+            { id: 'soc5', text: '多於大廳活動' }, 
+            { id: 'soc_hall', text: '叫喚下可至大廳配合治療' },
+            { id: 'soc6', text: '多於房內躺床' }, 
+            { id: 'soc1', text: '可與其他病友互動，互動合宜' }, 
+            { id: 'soc2', text: '少與其他病友互動，多獨自於房內活動' }, 
+            { id: 'soc3', text: '可參與職能活動' }, 
+            { id: 'soc_morning', text: '可參與早操活動' },
+            { id: 'soc_afternoon', text: '可參與午操活動' }
+        ] 
+    }
 };
 
 export const ADMISSION_CHECKLIST = {
@@ -268,7 +364,7 @@ export const DISCHARGE_CHECKLIST = {
         "確認小蝸牛或洗衣費 8E(0800-1700)分機11881/11882",
         "寫身心評估單",
         "DC護理計畫(Focus)D:今日辦理出院，故暫停此護理問題",
-        "有回診填《精神科病房出院追蹤》(家屬電話在入院評估)",
+        "回診填《精神科病房出院追蹤》(家屬電話在入院評估)",
         "出院照護指導摘要🠖跌倒評估、肌力評估、衰弱評估🠖勾選旁邊選項【活動限制】、【營養指導】、【衛教單張】選精神科、【即時返院】寫完 套用🠖儲存🠖簽名版🠖給家屬/病人簽名(單張)",
         "移除手圈、滿意度調查(單張)",
         "問是否要診斷書",

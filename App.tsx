@@ -10,7 +10,7 @@ import { WEEKDAY_REMINDERS, SHIFT_SETTINGS, COMMON_A_OPTIONS, COMMON_R_OPTIONS, 
 import { ShiftType, ExamItem } from './types';
 import { polishNursingNote, suggestNursingActions } from './services/geminiService';
 
-const PsychNursingProV41 = () => {
+const PsychNursingProV41_8 = () => {
   const [selectedFocus, setSelectedFocus] = useState('discharge_planning');
   const [selectedMSE, setSelectedMSE] = useState<string[]>([]);
   const [selectedSubjective, setSelectedSubjective] = useState<string[]>([]);
@@ -38,9 +38,9 @@ const PsychNursingProV41 = () => {
   
   const [currentShift, setCurrentShift] = useState<ShiftType>('A');
   const [handoverList, setHandoverList] = useState([
-      { id: 1, bed: '', record: 0, assess: 0, observe: 0, pain: 0, reminder: '', reminderTime: '', alerted: false },
-      { id: 2, bed: '', record: 0, assess: 0, observe: 0, pain: 0, reminder: '', reminderTime: '', alerted: false },
-      { id: 3, bed: '', record: 0, assess: 0, observe: 0, pain: 0, reminder: '', reminderTime: '', alerted: false },
+      { id: 1, bed: '', record: 0, assess: 0, observe: 0, pain: 0, painValue: '', reminder: '', reminderTime: '', alerted: false },
+      { id: 2, bed: '', record: 0, assess: 0, observe: 0, pain: 0, painValue: '', reminder: '', reminderTime: '', alerted: false },
+      { id: 3, bed: '', record: 0, assess: 0, observe: 0, pain: 0, painValue: '', reminder: '', reminderTime: '', alerted: false },
   ]);
   const [examList, setExamList] = useState<ExamItem[]>([]);
 
@@ -122,9 +122,6 @@ const PsychNursingProV41 = () => {
         const totalMin = h * 60 + m;
         
         let detectedShift: ShiftType = 'A';
-        // A: 08:01 (481) - 16:00 (960)
-        // E: 16:01 (961) - 00:00 (1440)
-        // N: 00:01 (1) - 08:00 (480)
         if (totalMin >= 481 && totalMin <= 960) detectedShift = 'A';
         else if (totalMin >= 961 || totalMin === 0) detectedShift = 'E';
         else detectedShift = 'N';
@@ -168,60 +165,74 @@ const PsychNursingProV41 = () => {
     setRecord({ D: '', A: '', R: '', T: '' });
     setEsketamineTime(''); setColonoscopyDate(''); setColonoscopyTime(''); setInjectionSite('');
     setCustomSleepTime('22:00'); setCustomWakeTime('06:30');
+    
     if (selectedFocus === 'admission_care') setChecklistType('admission');
   }, [selectedFocus]);
 
   const formatTimeForDoc = (time: string) => time.replace(':', '：');
 
   useEffect(() => {
-    if (selectedFocus === 'visitation') { setRecord(prev => ({ ...prev, D: `病人之${visitorName||'○○'}與前來會客，互動可。` })); return; }
-    if (selectedFocus === 'leave_absence') { setRecord(prev => ({ ...prev, D: `病人之${visitorName || '○○'}來訪要求帶外出，予告知${medicalTeamType}，經評估後，囑同意請假外出四小時。` })); return; }
-    if (selectedFocus === 'send_exam') {
-        const t = sendExamD.length > 0 ? sendExamD.map(s => s.replace(/○○/g, visitorName || '○○')).join('，') + "。" : "";
-        setRecord(prev => ({ ...prev, D: t })); return;
-    }
-    if (selectedFocus === 'other_symptoms') {
+    let baseD = "";
+    
+    if (selectedFocus === 'visitation') { 
+        baseD = `病人之${visitorName||'○○'}與前來會客，互動可。`;
+    } else if (selectedFocus === 'leave_absence') { 
+        baseD = `病人之${visitorName || '○○'}來訪要求帶外出，予告知${medicalTeamType}，經評估後，囑同意請假外出四小時。`;
+    } else if (selectedFocus === 'send_exam') {
+        baseD = sendExamD.length > 0 ? sendExamD.map(s => s.replace(/○○/g, visitorName || '○○')).join('，') + "。" : "";
+    } else if (selectedFocus === 'other_symptoms') {
         const subtypeData = OTHER_SYMPTOM_SUBTYPES[otherSymptomType];
-        if (otherSymptomType === 'esketamine') setRecord(prev => ({ ...prev, D: `病人今於${esketamineTime ? formatTimeForDoc(esketamineTime) : '○○：○○'}使用Esketamine Nasal Spray 28mg/Bot，使用前生命徵象：BP:   /   mmHg, PR:   /min, RR:   /min。` }));
-        else if (otherSymptomType === 'rtms') setRecord(prev => ({ ...prev, D: `疾病需求，現由${visitorName || '○○'}帶病人至5樓門診區做rTMS。` }));
-        else if (otherSymptomType === 'colonoscopy') setRecord(prev => ({ ...prev, D: `病人預計${colonoscopyDate ? colonoscopyDate.split('-').slice(1).join('月') + '日' : '○○月○○日'}${colonoscopyTime ? formatTimeForDoc(colonoscopyTime) : '○○：○○'}做大腸內視鏡檢查。` }));
-        else setRecord(prev => ({ ...prev, D: subtypeData?.d_template || '' }));
-        return;
-    }
-
-    if (['admission_care', 'restraint_limbs'].includes(selectedFocus)) return;
-
-    let baseD = "予以觀察下，病人";
-    if (selectedFocus === 'risk_falls' && fallsD.length > 0) {
-        baseD += fallsD.join('，') + "。";
-    } else if (selectedFocus === 'sleep_pattern' && sleepD.length > 0) {
-        const processedD = sleepD.map(d => {
-            if (d.startsWith('病人於')) return d.replace(/○○：○○/g, formatTimeForDoc(customSleepTime));
-            if (d.includes('晨醒') || d.includes('早醒')) return d.replace(/○○：○○/g, formatTimeForDoc(customWakeTime));
-            return d;
-        });
-        baseD += processedD.join('，') + "。";
+        if (otherSymptomType === 'esketamine') baseD = `病人今於${esketamineTime ? formatTimeForDoc(esketamineTime) : '○○：○○'}使用Esketamine Nasal Spray 28mg/Bot，使用前生命徵象：BP:   /   mmHg, PR:   /min, RR:   /min。`;
+        else if (otherSymptomType === 'rtms') baseD = `疾病需求，現由${visitorName || '○○'}帶病人至5樓門診區做rTMS。`;
+        else if (otherSymptomType === 'colonoscopy') baseD = `病人預計${colonoscopyDate ? colonoscopyDate.split('-').slice(1).join('月') + '日' : '○○月○○日'}${colonoscopyTime ? formatTimeForDoc(colonoscopyTime) : '○○：○○'}做大腸內視鏡檢查。`;
+        else baseD = subtypeData?.d_template || "";
+    } else if (['admission_care', 'restraint_limbs'].includes(selectedFocus)) {
+        return; // 這兩項由 addText 處理或獨立邏輯，不透過此通用 Effect 產生完整 D
     } else {
-        if (selectedFocus !== 'risk_falls' && selectedFocus !== 'sleep_pattern') {
-            let obs: string[] = [];
-            ['affect','appearance','behavior','speech','nutrition','social'].forEach(k => {
-                const items = MSE_COMMON_DATA[k].tags.filter(t => selectedMSE.includes(t.id)).map(t => t.text);
-                if(items.length) obs.push(items.join('、'));
+        // 通用 NANDA 焦點與評估
+        let dSegments: string[] = [];
+        let obsPart = "予以觀察下，病人";
+        
+        if (selectedFocus === 'risk_falls' && fallsD.length > 0) {
+            obsPart += fallsD.join('，');
+        } else if (selectedFocus === 'sleep_pattern' && sleepD.length > 0) {
+            const processedD = sleepD.map(d => {
+                if (d.startsWith('病人於')) return d.replace(/○○：○○/g, formatTimeForDoc(customSleepTime));
+                if (d.includes('晨醒') || d.includes('早醒')) return d.replace(/○○：○○/g, formatTimeForDoc(customWakeTime));
+                return d;
             });
-            baseD += obs.length ? obs.join('，') + "。" : "精神狀況尚屬穩定。";
+            obsPart += processedD.join('，');
+        } else {
+            if (selectedFocus !== 'risk_falls' && selectedFocus !== 'sleep_pattern') {
+                let obs: string[] = [];
+                ['affect','appearance','behavior','speech','nutrition','social'].forEach(k => {
+                    const items = MSE_COMMON_DATA[k].tags.filter(t => selectedMSE.includes(t.id)).map(t => t.text);
+                    if(items.length) obs.push(items.join('，'));
+                });
+                obsPart += obs.length ? obs.join('，') : "精神狀況尚屬穩定";
+            }
         }
+        dSegments.push(obsPart);
+        
+        const subItems = NANDA_FOCUS_DATA[selectedFocus]?.subjective_tags?.filter(t => selectedSubjective.includes(t.id)).map(t => t.text) || [];
+        const commonSub = COMMON_D_OBSERVATIONS.filter(t => selectedSubjective.includes(t.id)).map(t => t.text);
+        let quoteItems = [...subItems];
+        if (customSubjective) quoteItems.push(customSubjective);
+
+        if (commonSub.length > 0 || quoteItems.length > 0) {
+            let subPart = "予以探視及關心時";
+            let subSegments: string[] = [];
+            if (commonSub.length > 0) subSegments.push(commonSub.join('，'));
+            if (quoteItems.length > 0) subSegments.push(`病人表示：「${quoteItems.join('，')}」`);
+            subPart += "，" + subSegments.join('，');
+            dSegments.push(subPart);
+        }
+        
+        // 修正標點：中間以逗號隔開，末尾加句號
+        baseD = dSegments.join('，').replace(/，，/g, '，').trim();
+        if (baseD && !baseD.endsWith('。')) baseD += "。";
     }
     
-    const subItems = NANDA_FOCUS_DATA[selectedFocus]?.subjective_tags?.filter(t => selectedSubjective.includes(t.id)).map(t => t.text) || [];
-    const commonSub = COMMON_D_OBSERVATIONS.filter(t => selectedSubjective.includes(t.id)).map(t => t.text);
-    let quoteItems = [...subItems];
-    if (customSubjective) quoteItems.push(customSubjective);
-
-    if (commonSub.length > 0 || quoteItems.length > 0) {
-        baseD += "予以探視及關心時，";
-        if (commonSub.length > 0) baseD += commonSub.join('，') + "。";
-        if (quoteItems.length > 0) baseD += `病人表示：「${quoteItems.join('，')}」。`;
-    }
     setRecord(prev => ({ ...prev, D: baseD }));
   }, [selectedMSE, selectedSubjective, selectedFocus, visitorName, fallsD, sleepD, sendExamD, customSubjective, medicalTeamType, otherSymptomType, esketamineTime, colonoscopyDate, colonoscopyTime, injectionSite, customSleepTime, customWakeTime]);
 
@@ -243,16 +254,32 @@ const PsychNursingProV41 = () => {
       }
 
       if (f === 'R') {
-          let cleanContent = content.trim().replace(/。$/, '').replace(/，$/, '');
-          let cleanText = text.trim().replace(/。$/, '').replace(/，$/, '');
+          let cleanContent = content.trim().replace(/[。，]$/, '');
+          let cleanText = text.trim().replace(/[。，]$/, '');
           if (cleanContent.includes(cleanText)) return prev;
           const newContent = cleanContent ? `${cleanContent}，${cleanText}。` : `${cleanText}。`;
           return { ...prev, R: newContent };
       }
 
       if (f === 'T') return { ...prev, T: content.includes(text) ? content : (content ? `${content}\n${text}` : text) };
-      if (f === 'D' && selectedFocus === 'restraint_limbs') return { ...prev, D: content.includes(text) ? content.replace(text, '').replace(/，，/g, '，').trim() : (content ? `${content}，${text}` : text) };
-      if (f === 'D' && selectedFocus === 'admission_care') return { ...prev, D: content === text ? '' : text }; 
+      
+      if (f === 'D') {
+          if (selectedFocus === 'restraint_limbs') {
+              let cleanContent = content.replace(/。$/, '').trim();
+              let cleanText = text.replace(/。$/, '').trim();
+              if (cleanContent.includes(cleanText)) {
+                  // 移除邏輯
+                  let newContent = cleanContent.replace(new RegExp(`${cleanText}[，]?`, 'g'), '').replace(/，$/g, '').trim();
+                  return { ...prev, D: newContent ? newContent + "。" : "" };
+              } else {
+                  // 新增邏輯
+                  let newContent = cleanContent ? `${cleanContent}，${cleanText}` : cleanText;
+                  return { ...prev, D: newContent + "。" };
+              }
+          }
+          if (selectedFocus === 'admission_care') return { ...prev, D: content === text ? '' : text }; 
+          return { ...prev, D: content.includes(text) ? content : `${content}\n${text}` };
+      }
       return { ...prev, [f]: content.includes(text) ? content : `${content}\n${text}` };
     });
   };
@@ -283,7 +310,7 @@ const PsychNursingProV41 = () => {
     try {
         const suggestions = await suggestNursingActions(NANDA_FOCUS_DATA[selectedFocus].label, record.D);
         if (suggestions.length > 0) {
-            setRecord(prev => ({ ...prev, A: (prev.A ? prev.A + '\n' : '') + suggestions.join('\n') + "\n(AI 建議)", R: (prev.R ? prev.R.replace(/。$/, '，') : '') + " (請參考 AI 建議)。" }));
+            setRecord(prev => ({ ...prev, A: (prev.A ? prev.A + '\n' : '') + suggestions.join('\n') + "\n(AI 建議)", R: (prev.R ? prev.R.replace(/[。]$/, '') + "，" : "") + "(請參考 AI 建議)。" }));
         }
     } catch (e) { alert("AI 連線失敗"); }
     setIsAiLoading(prev => ({ ...prev, a: false }));
@@ -303,7 +330,7 @@ const PsychNursingProV41 = () => {
           <div className="px-6 py-3 flex items-center justify-between gap-6">
             <div className="flex items-center gap-3 shrink-0">
                 <div className="bg-gradient-to-tr from-green-400 to-teal-500 p-2 rounded-xl shadow-lg shadow-green-500/20"><Stethoscope className="text-white w-6 h-6" /></div>
-                <div><h1 className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600 hidden md:block">精神科護理通</h1><span className="text-[10px] font-bold tracking-widest uppercase text-slate-400 hidden md:block">Pro V41.0 れんと</span></div>
+                <div><h1 className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600 hidden md:block">精神科護理通</h1><span className="text-[10px] font-bold tracking-widest uppercase text-slate-400 hidden md:block">Pro V41.8 れんと</span></div>
             </div>
             <div className="flex items-center gap-3 flex-grow max-w-2xl min-w-0">
                 <div className="relative flex-grow">
@@ -326,62 +353,111 @@ const PsychNursingProV41 = () => {
         <div className="flex-1 min-w-0 glass-panel rounded-3xl flex flex-col min-h-0 overflow-hidden transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
              {showInputBox ? (
                  <div className="p-6 flex flex-col gap-5 h-full overflow-y-auto custom-scrollbar">
+                     <h3 className="font-bold text-lg text-blue-700 flex items-center gap-2 px-1"><User size={20} className="text-blue-500"/> 基本資料與處置</h3>
                      {['leave_absence', 'visitation', 'send_exam', 'admission_care'].includes(selectedFocus) || (selectedFocus === 'other_symptoms' && otherSymptomType === 'rtms') ? (
-                         <>
-                             <h3 className="font-bold text-lg text-slate-700 flex items-center gap-2 px-1"><User size={20} className="text-blue-500"/> 基本資料</h3>
-                             <input value={visitorName} onChange={e=>setVisitorName(e.target.value)} className="glass-input p-3 rounded-xl text-base w-full" placeholder="稱謂 (媽媽、哥哥)..."/>
+                         <div className="space-y-4 bg-white/30 p-4 rounded-2xl border border-white/40">
+                             <input value={visitorName} onChange={e=>setVisitorName(e.target.value)} className="glass-input p-3 rounded-xl text-base w-full font-bold" placeholder="稱謂 (媽媽、哥哥)..."/>
                              <div className="flex flex-wrap gap-2">{RELATION_OPTIONS.map(r => <button key={r} onClick={() => setVisitorName(prev => prev.includes(r) ? prev.replace(r, '').replace(/、+/, '、').trim() : (prev ? `${prev}、${r}` : r))} className={`text-sm px-4 py-1.5 rounded-full border transition-all ${visitorName.includes(r) ? 'bg-blue-500 text-white border-blue-400' : 'bg-white/40 text-slate-600 border-white/40'}`}>{r}</button>)}</div>
-                         </>
+                         </div>
                      ) : null}
                      {selectedFocus === 'other_symptoms' && (
-                         <div className="flex flex-col gap-4">
-                             <h3 className="font-bold text-lg text-slate-700 flex items-center gap-2 px-1"><ListChecks size={20} className="text-indigo-500"/> 處置項目</h3>
+                         <div className="flex flex-col gap-4 bg-white/30 p-4 rounded-2xl border border-white/40">
+                             <h4 className="font-bold text-slate-600 flex items-center gap-2"><ListChecks size={18}/> 處置項目選擇</h4>
                              <select value={otherSymptomType} onChange={(e) => setOtherSymptomType(e.target.value as any)} className="glass-input w-full p-3 rounded-xl appearance-none font-bold text-slate-700">{Object.entries(OTHER_SYMPTOM_SUBTYPES).map(([k, d]) => <option key={k} value={k}>{d.label}</option>)}</select>
-                             {otherSymptomType === 'esketamine' && <input type="time" value={esketamineTime} onChange={e => setEsketamineTime(e.target.value)} className="glass-input w-full p-2 rounded-lg"/>}
-                             {otherSymptomType === 'long_acting_injection' && <div className="flex flex-wrap gap-2">{OTHER_SYMPTOM_SUBTYPES.long_acting_injection.sites?.map(s => <button key={s} onClick={() => setInjectionSite(s)} className={`text-sm px-3 py-1.5 rounded-lg border transition-all ${injectionSite === s ? 'bg-indigo-600 text-white' : 'bg-white/40 text-slate-700'}`}>{s}</button>)}</div>}
+                             {otherSymptomType === 'esketamine' && <input type="time" value={esketamineTime} onChange={e => setEsketamineTime(e.target.value)} className="glass-input w-full p-2 rounded-lg font-bold text-slate-700"/>}
+                             {otherSymptomType === 'long_acting_injection' && <div className="flex flex-wrap gap-2">{OTHER_SYMPTOM_SUBTYPES.long_acting_injection.sites?.map(s => <button key={s} onClick={() => setInjectionSite(s)} className={`text-sm px-3 py-1.5 rounded-lg border transition-all font-medium ${injectionSite === s ? 'bg-indigo-600 text-white shadow-md' : 'bg-white/40 text-slate-700'}`}>{s}</button>)}</div>}
                          </div>
                      )}
-                     {selectedFocus === 'send_exam' && NANDA_FOCUS_DATA.send_exam.d_options?.map(o => <button key={o} onClick={() => toggle(o, sendExamD, setSendExamD)} className={`text-sm text-left p-3 rounded-xl border ${sendExamD.includes(o) ? 'bg-indigo-500 text-white' : 'bg-white/40'}`}>{o.replace(/○○/g, visitorName || '○○')}</button>)}
+                     {selectedFocus === 'send_exam' && (
+                         <div className="space-y-2">
+                             {NANDA_FOCUS_DATA.send_exam.d_options?.map(o => <button key={o} onClick={() => toggle(o, sendExamD, setSendExamD)} className={`text-sm text-left w-full p-3 rounded-xl border transition-all ${sendExamD.includes(o) ? 'bg-blue-500 text-white border-blue-400 shadow-md' : 'bg-white/40 border-white/40 hover:bg-white/60'}`}>{o.replace(/○○/g, visitorName || '○○')}</button>)}
+                         </div>
+                     )}
                  </div>
              ) : selectedFocus === 'restraint_limbs' ? (
                  <div className="p-6 flex flex-col gap-4 h-full overflow-y-auto custom-scrollbar">
-                     <h3 className="font-bold text-lg text-orange-700 flex items-center"><Lock size={18} className="mr-2"/> 約束原因</h3>
-                     <div className="flex flex-wrap gap-2">{NANDA_FOCUS_DATA.restraint_limbs.reasons?.map(r=><button key={r} onClick={()=>setRestraintReason(r)} className={`text-sm px-4 py-1.5 rounded-full border ${restraintReason===r?'bg-orange-500 text-white':'bg-white/40'}`}>{r}</button>)}</div>
-                     <div className="flex-1 space-y-2 mt-2">{NANDA_FOCUS_DATA.restraint_limbs.d_templates?.map((t,i)=><button key={i} onClick={()=>addText('D',t)} className="text-sm text-left w-full p-3 bg-white/30 border rounded-xl hover:bg-white/60">{t.replace(/○○/g, restraintReason).replace(/△△/g, restraintType).replace(/□□/g, restraintScope)}</button>)}</div>
+                     <h3 className="font-bold text-lg text-orange-700 flex items-center"><Lock size={18} className="mr-2"/> 約束相關處置</h3>
+                     <div className="bg-white/30 p-4 rounded-2xl border border-white/40 space-y-3">
+                         <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider">約束原因</h4>
+                         <div className="flex flex-wrap gap-2">{NANDA_FOCUS_DATA.restraint_limbs.reasons?.map(r=><button key={r} onClick={()=>setRestraintReason(r)} className={`text-sm px-4 py-1.5 rounded-full border transition-all font-medium ${restraintReason===r?'bg-orange-500 text-white shadow-md border-orange-400':'bg-white/40 text-slate-600'}`}>{r}</button>)}</div>
+                     </div>
+                     <div className="flex-1 space-y-2 mt-2">{NANDA_FOCUS_DATA.restraint_limbs.d_templates?.map((t,i)=><button key={i} onClick={()=>addText('D',t)} className="text-sm text-left w-full p-3 bg-white/30 border border-white/40 rounded-xl hover:bg-white/60 hover:shadow-sm transition-all text-slate-700">{t.replace(/○○/g, restraintReason).replace(/△△/g, restraintType).replace(/□□/g, restraintScope)}</button>)}</div>
                  </div>
              ) : selectedFocus === 'risk_falls' || selectedFocus === 'sleep_pattern' ? (
                  <div className="p-6 flex flex-col gap-4 h-full overflow-y-auto custom-scrollbar">
-                     <h3 className={`font-bold text-lg flex items-center gap-2 ${selectedFocus==='risk_falls'?'text-red-700':'text-indigo-700'}`}>{selectedFocus==='risk_falls'?<AlertTriangle size={20}/>:<Moon size={20}/>} {selectedFocus==='risk_falls'?'跌倒風險':'睡眠資料'}</h3>
-                     <div className="flex-1 space-y-2">{(selectedFocus==='risk_falls'?NANDA_FOCUS_DATA.risk_falls:NANDA_FOCUS_DATA.sleep_pattern).d_options?.map(o => <button key={o} onClick={()=>toggle(o, selectedFocus==='risk_falls'?fallsD:sleepD, selectedFocus==='risk_falls'?setFallsD:setSleepD)} className={`text-sm text-left w-full p-3 rounded-xl border ${(selectedFocus==='risk_falls'?fallsD:sleepD).includes(o)?'bg-slate-700 text-white':'bg-white/40'}`}>{o.replace(/○○：○○/g, formatTimeForDoc(selectedFocus==='sleep_pattern'?customSleepTime:customWakeTime))}</button>)}</div>
+                     <h3 className={`font-bold text-lg flex items-center gap-2 ${selectedFocus==='risk_falls'?'text-red-700':'text-indigo-700'}`}>{selectedFocus==='risk_falls'?<AlertTriangle size={20}/>:<Moon size={20}/>} {selectedFocus==='risk_falls'?'跌倒風險評估':'睡眠型態評估'}</h3>
+                     <div className="flex-1 space-y-2">{(selectedFocus==='risk_falls'?NANDA_FOCUS_DATA.risk_falls:NANDA_FOCUS_DATA.sleep_pattern).d_options?.map(o => <button key={o} onClick={()=>toggle(o, selectedFocus==='risk_falls'?fallsD:sleepD, selectedFocus==='risk_falls'?setFallsD:setSleepD)} className={`text-sm text-left w-full p-3 rounded-xl border transition-all ${(selectedFocus==='risk_falls'?fallsD:sleepD).includes(o)?'bg-slate-700 text-white border-slate-600 shadow-md':'bg-white/40 border-white/40 hover:bg-white/60'}`}>{o.replace(/○○：○○/g, formatTimeForDoc(selectedFocus==='sleep_pattern'?customSleepTime:customWakeTime))}</button>)}</div>
                  </div>
              ) : (
                  <div className="flex flex-col flex-1 min-h-0">
-                    <div className="shrink-0 border-b border-white/20 bg-white/10 overflow-x-auto pb-2 pt-2 px-2 custom-scrollbar">
-                        <div className="flex flex-nowrap gap-2">{Object.entries(MSE_COMMON_DATA).map(([k, d]) => <button key={k} onClick={() => setActiveMseCategory(k)} className={`px-3 py-2 rounded-xl text-sm font-bold whitespace-nowrap ${activeMseCategory === k ? 'bg-blue-500 text-white' : 'bg-white/30 text-slate-600'}`}>{d.title}</button>)}</div>
+                    <div className="p-4 shrink-0 pb-0">
+                        {selectedFocus === 'discharge_planning' && (
+                           <div className="mb-4 bg-violet-50/80 p-4 rounded-2xl border border-violet-200 flex items-center justify-between shadow-sm animate-fade-in">
+                               <div className="flex items-center gap-3">
+                                   <div className="bg-violet-500 p-2.5 rounded-xl text-white shadow-md"><LogOut size={20}/></div>
+                                   <div>
+                                       <h4 className="font-bold text-violet-800 text-sm">出院行政核對</h4>
+                                       <p className="text-[10px] text-violet-600 font-bold uppercase tracking-tight">Discharge Checklist</p>
+                                   </div>
+                               </div>
+                               <button 
+                                   onClick={() => setChecklistType('discharge')}
+                                   className="bg-violet-600 text-white px-4 py-2 rounded-xl font-bold text-sm shadow-lg hover:bg-violet-700 transition-all active:scale-95 flex items-center gap-2 border border-violet-400/50"
+                               >
+                                   <ClipboardCheck size={16}/> 開啟檢核表
+                               </button>
+                           </div>
+                        )}
+                        <h3 className="font-bold text-lg text-blue-700 flex items-center gap-2 mb-3"><Brain size={22} className="text-blue-500"/> 精神狀況評估 (MSE)</h3>
+                        <div className="border-b border-white/20 bg-white/10 overflow-x-auto pb-2 pt-2 px-2 rounded-xl custom-scrollbar">
+                            <div className="flex flex-nowrap gap-2">{Object.entries(MSE_COMMON_DATA).map(([k, d]) => <button key={k} onClick={() => setActiveMseCategory(k)} className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${activeMseCategory === k ? 'bg-blue-600 text-white shadow-lg border-blue-400' : 'bg-white/40 text-slate-600 hover:bg-white/70'}`}>{d.title}</button>)}</div>
+                        </div>
                     </div>
-                    <div className="flex-1 overflow-y-auto p-4 flex flex-wrap gap-2">{MSE_COMMON_DATA[activeMseCategory]?.tags.map(t => <button key={t.id} onClick={() => toggle(t.id, selectedMSE, setSelectedMSE)} className={`text-sm px-4 py-1.5 rounded-full border ${selectedMSE.includes(t.id)?'bg-blue-600 text-white':'bg-white/40 text-slate-700'}`}>{t.text}</button>)}</div>
-                    <div className="flex-1 flex flex-col border-t border-white/30 bg-indigo-50/20 p-4 space-y-4">
-                        <textarea value={customSubjective} onChange={e=>setCustomSubjective(e.target.value)} className="glass-input w-full p-3 rounded-xl text-lg h-24 resize-none outline-none" placeholder="輸入自訂主訴..."/>
-                        <div className="flex flex-wrap gap-2">{COMMON_D_OBSERVATIONS.map(t=><button key={t.id} onClick={()=>toggle(t.id, selectedSubjective, setSelectedSubjective)} className={`text-sm px-3 py-1.5 rounded-xl border ${selectedSubjective.includes(t.id)?'bg-indigo-600 text-white':'bg-white/40'}`}>{t.text}</button>)}</div>
+                    <div className="flex-1 overflow-y-auto p-4 flex flex-wrap gap-2 content-start custom-scrollbar">{MSE_COMMON_DATA[activeMseCategory]?.tags.map(t => <button key={t.id} onClick={() => toggle(t.id, selectedMSE, setSelectedMSE)} className={`text-sm px-4 py-2 rounded-full border transition-all font-medium ${selectedMSE.includes(t.id)?'bg-blue-600 text-white shadow-md border-blue-400':'bg-white/40 text-slate-700 hover:bg-white/60'}`}>{t.text}</button>)}</div>
+                    <div className="shrink-0 flex flex-col border-t border-white/30 bg-indigo-50/30 p-4 space-y-4 rounded-b-3xl">
+                        <div className="flex items-center gap-2 text-indigo-700 font-bold text-sm uppercase tracking-wider"><FileText size={16}/> 病人主訴與通用觀察</div>
+                        <textarea value={customSubjective} onChange={e=>setCustomSubjective(e.target.value)} className="glass-input w-full p-3 rounded-xl text-lg h-24 resize-none outline-none font-medium text-slate-700" placeholder="輸入病人主訴原文..."/>
+                        <div className="flex flex-wrap gap-2">{COMMON_D_OBSERVATIONS.map(t=><button key={t.id} onClick={() => toggle(t.id, selectedSubjective, setSelectedSubjective)} className={`text-xs px-3 py-1.5 rounded-xl border transition-all font-medium ${selectedSubjective.includes(t.id)?'bg-indigo-600 text-white shadow-sm border-indigo-400':'bg-white/40 text-slate-600 hover:bg-white/60'}`}>{t.text}</button>)}</div>
                     </div>
                  </div>
              )}
         </div>
 
         <div className="flex-1 min-w-0 glass-panel rounded-3xl flex flex-col min-h-0 overflow-hidden transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
-            <div className="p-4 bg-white/30 border-b font-bold text-slate-700 flex items-center gap-2"><Activity size={18} className="text-pink-500"/> 處置建議</div>
+            <div className="p-4 bg-white/30 border-b font-bold text-slate-700 flex items-center gap-2"><Activity size={18} className="text-pink-500"/> 處置建議 (A/R)</div>
             <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
-                <div className="glass-card rounded-2xl overflow-hidden"><div className="px-4 py-2 bg-pink-500/10 flex justify-between items-center"><span className="text-sm font-bold text-pink-700">A (措施)</span><button onClick={handleAiSuggestA} disabled={isAiLoading.a} className="glass-button flex items-center gap-1 px-3 py-1 rounded-full text-xs text-pink-700 font-bold">{isAiLoading.a ? <Loader2 className="animate-spin" size={12}/> : <Sparkles size={12}/>} AI 建議</button></div><div className="p-3 flex flex-col gap-1.5">{COMMON_A_OPTIONS.map((t,i)=><button key={i} onClick={()=>addText('A',t)} className="text-sm text-left px-3 py-2 hover:bg-white/50 rounded-lg text-slate-600">+ {t}</button>)}{activeFocusData?.actions?.map((t,i)=><button key={i} onClick={()=>addText('A',t)} className="text-sm text-left px-3 py-2 hover:bg-white/50 rounded-lg text-slate-700 leading-snug">+ {t}</button>)}</div></div>
-                <div className="glass-card rounded-2xl overflow-hidden"><div className="px-4 py-2 bg-emerald-500/10"><span className="text-sm font-bold text-emerald-700">R (評值)</span></div><div className="p-3 flex flex-col gap-1.5">{COMMON_R_OPTIONS.map((t,i)=><button key={i} onClick={()=>addText('R',t)} className="text-sm bg-white/40 border px-3 py-1 rounded-full hover:bg-emerald-50/50 hover:text-emerald-700 transition-colors">• {t}</button>)}{activeFocusData?.responses?.map((t,i)=><button key={i} onClick={()=>addText('R',t)} className="text-sm text-left px-3 py-2 hover:bg-white/50 rounded-lg text-slate-700 leading-snug">+ {t}</button>)}</div></div>
+                <div className="glass-card rounded-2xl overflow-hidden"><div className="px-4 py-2 bg-pink-500/10 flex justify-between items-center"><span className="text-sm font-bold text-pink-700">A (措施與介入)</span><button onClick={handleAiSuggestA} disabled={isAiLoading.a} className="glass-button flex items-center gap-1 px-3 py-1 rounded-full text-xs text-pink-700 font-bold border-pink-200/50">{isAiLoading.a ? <Loader2 className="animate-spin" size={12}/> : <Sparkles size={12}/>} AI 建議</button></div><div className="p-3 flex flex-col gap-1.5">{COMMON_A_OPTIONS.map((t,i)=><button key={i} onClick={()=>addText('A',t)} className="text-sm text-left px-3 py-2 hover:bg-pink-50 rounded-lg text-slate-600 border border-transparent hover:border-pink-100 transition-all">+ {t}</button>)}{activeFocusData?.actions?.map((t,i)=><button key={i} onClick={()=>addText('A',t)} className="text-sm text-left px-3 py-2 hover:bg-pink-50 rounded-lg text-slate-700 leading-snug border border-transparent hover:border-pink-100 transition-all">+ {t}</button>)}</div></div>
+                <div className="glass-card rounded-2xl overflow-hidden"><div className="px-4 py-2 bg-emerald-500/10"><span className="text-sm font-bold text-emerald-700">R (治療反應與評值)</span></div><div className="p-3 flex flex-col gap-1.5">{COMMON_R_OPTIONS.map((t,i)=><button key={i} onClick={()=>addText('R',t)} className="text-sm bg-white/40 border border-emerald-100/50 px-3 py-1 rounded-full hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 transition-all">• {t}</button>)}{activeFocusData?.responses?.map((t,i)=><button key={i} onClick={()=>addText('R',t)} className="text-sm text-left px-3 py-2 hover:bg-emerald-50 rounded-lg text-slate-700 leading-snug border border-transparent hover:border-emerald-100 transition-all">+ {t}</button>)}</div></div>
             </div>
         </div>
 
         <div className="flex-1 min-w-0 glass-panel rounded-3xl flex flex-col min-h-0 overflow-hidden transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
-            <div className="p-4 bg-slate-800/90 text-white font-bold flex justify-between items-center z-10 shrink-0"><span className="flex items-center gap-2"><FileText size={18}/> 紀錄預覽</span><button onClick={copyAll} className="glass-button bg-green-500/20 text-green-300 px-4 py-1.5 rounded-full hover:bg-green-500/40 text-sm flex items-center gap-2"><Copy size={14}/> 複製</button></div>
-            <div className="flex-1 p-4 space-y-4 overflow-y-auto custom-scrollbar flex flex-col bg-white/20">
-                <div className="glass-card rounded-2xl p-3 flex flex-col flex-[2] min-h-[140px]"><div className="flex justify-between px-1 mb-2 items-center"><span className="text-xs font-bold text-blue-600 bg-blue-100/50 px-2 py-1 rounded-md">D: Data</span><button onClick={handleAiPolishD} disabled={isAiLoading.d} className="text-xs text-blue-500 flex items-center gap-1 hover:bg-blue-50 rounded-full px-3 py-1 border">{isAiLoading.d ? <Loader2 className="animate-spin" size={12}/> : <Sparkles size={12}/>} 修飾</button></div><textarea value={record.D} onChange={e=>setRecord({...record,D:e.target.value})} className="w-full flex-1 text-base outline-none resize-none p-2 text-slate-700 bg-transparent" placeholder="輸入資料..."/></div>
-                <div className="glass-card rounded-2xl p-3 flex flex-col flex-1 min-h-[110px]"><span className="text-xs font-bold text-pink-600 bg-pink-100/50 px-2 py-1 rounded-md mb-2">A: Action</span><textarea value={record.A} onChange={e=>setRecord({...record,A:e.target.value})} className="w-full flex-1 text-base outline-none resize-none p-2 text-slate-700 bg-transparent" placeholder="輸入措施..."/></div>
-                <div className="glass-card rounded-2xl p-3 flex flex-col flex-1 min-h-[110px]"><span className="text-xs font-bold text-emerald-600 bg-emerald-100/50 px-2 py-1 rounded-md mb-2">R: Response</span><textarea value={record.R} onChange={e=>setRecord({...record,R:e.target.value})} className="w-full flex-1 text-base outline-none resize-none p-2 text-slate-700 bg-transparent" placeholder="輸入評值..."/></div>
+            <div className="p-4 bg-slate-800/95 text-white font-bold flex justify-between items-center z-10 shrink-0"><span className="flex items-center gap-2"><FileText size={18}/> 護理紀錄預覽</span><button onClick={copyAll} className="glass-button bg-green-500/20 text-green-300 px-5 py-2 rounded-full hover:bg-green-500/40 text-sm flex items-center gap-2 border-green-500/30 transition-all"><Copy size={14}/> 複製全文</button></div>
+            <div className="flex-1 p-4 space-y-4 overflow-y-auto custom-scrollbar flex flex-col bg-slate-50/30">
+                <div className="glass-card rounded-2xl p-3 flex flex-col flex-[2] min-h-[140px] border-blue-100 shadow-lg">
+                    <div className="flex justify-between px-1 mb-2 items-center">
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-blue-600 bg-blue-100/50 px-3 py-1 rounded-lg border border-blue-200/50 uppercase tracking-tighter">D: Data</span>
+                            <button onClick={() => copySingle(record.D, 'D')} className="text-blue-500 hover:text-blue-700 transition-all p-1.5 hover:bg-blue-100 rounded-lg" title="單獨複製 D"><Copy size={14}/></button>
+                        </div>
+                        <button onClick={handleAiPolishD} disabled={isAiLoading.d} className="text-xs text-blue-600 font-bold flex items-center gap-1.5 hover:bg-blue-100/80 rounded-full px-4 py-1.5 border border-blue-200 transition-all">{isAiLoading.d ? <Loader2 className="animate-spin" size={12}/> : <Sparkles size={12}/>} AI 修飾語句</button>
+                    </div>
+                    <textarea value={record.D} onChange={e=>setRecord({...record,D:e.target.value})} className="w-full flex-1 text-base outline-none resize-none p-2 text-slate-700 bg-transparent font-medium leading-relaxed" placeholder="產生的資料將顯示於此..."/>
+                </div>
+                <div className="glass-card rounded-2xl p-3 flex flex-col flex-1 min-h-[110px] border-pink-100">
+                    <div className="mb-2 flex items-center gap-2">
+                        <span className="text-xs font-bold text-pink-600 bg-pink-100/50 px-3 py-1 rounded-lg border border-pink-200/50 uppercase tracking-tighter">A: Action</span>
+                        <button onClick={() => copySingle(record.A, 'A')} className="text-pink-500 hover:text-pink-700 transition-all p-1.5 hover:bg-pink-100 rounded-lg" title="單獨複製 A"><Copy size={14}/></button>
+                    </div>
+                    <textarea value={record.A} onChange={e=>setRecord({...record,A:e.target.value})} className="w-full flex-1 text-base outline-none resize-none p-2 text-slate-700 bg-transparent font-medium leading-relaxed" placeholder="採取的措施..."/>
+                </div>
+                <div className="glass-card rounded-2xl p-3 flex flex-col flex-1 min-h-[110px] border-emerald-100">
+                    <div className="mb-2 flex items-center gap-2">
+                        <span className="text-xs font-bold text-emerald-600 bg-emerald-100/50 px-3 py-1 rounded-lg border border-emerald-200/50 uppercase tracking-tighter">R: Response</span>
+                        <button onClick={() => copySingle(record.R, 'R')} className="text-emerald-500 hover:text-emerald-700 transition-all p-1.5 hover:bg-emerald-100 rounded-lg" title="單獨複製 R"><Copy size={14}/></button>
+                    </div>
+                    <textarea value={record.R} onChange={e=>setRecord({...record,R:e.target.value})} className="w-full flex-1 text-base outline-none resize-none p-2 text-slate-700 bg-transparent font-medium leading-relaxed" placeholder="病人的反應..."/>
+                </div>
             </div>
         </div>
       </div>
@@ -389,4 +465,4 @@ const PsychNursingProV41 = () => {
   );
 };
 
-export default PsychNursingProV41;
+export default PsychNursingProV41_8;

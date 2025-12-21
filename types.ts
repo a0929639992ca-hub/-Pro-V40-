@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export interface HandoverItem {
@@ -7,6 +8,7 @@ export interface HandoverItem {
     assess: number;
     observe: number;
     pain: number;
+    painValue?: string; // 新增疼痛文字輸入
     reminder: string;
     reminderTime: string;
     alerted: boolean;

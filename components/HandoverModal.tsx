@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { ListChecks, X, PlusCircle, MinusCircle, AlarmClock, Clock } from 'lucide-react';
+import { ListChecks, X, PlusCircle, MinusCircle, AlarmClock, Clock, Eraser } from 'lucide-react';
 import { HandoverItem, ExamItem } from '../types';
 import StatusIcon from './StatusIcon';
 
@@ -28,7 +29,20 @@ const HandoverModal: React.FC<Props> = ({ onClose, handoverList, setHandoverList
         setHandoverList(prev => prev.map(item => item.id === id ? { ...item, [field]: val, alerted: false } : item));
     };
 
-    const addRow = () => setHandoverList([...handoverList, { id: Date.now(), bed: '', record: 0, assess: 0, observe: 0, pain: 0, reminder: '', reminderTime: '', alerted: false }]);
+    // 自動排序邏輯
+    const sortList = () => {
+        setHandoverList(prev => [...prev].sort((a, b) => {
+            const bedA = a.bed.replace(/\D/g, '').padStart(5, '0');
+            const bedB = b.bed.replace(/\D/g, '').padStart(5, '0');
+            return bedA.localeCompare(bedB);
+        }));
+    };
+
+    const addRow = () => {
+        setHandoverList([...handoverList, { id: Date.now(), bed: '', record: 0, assess: 0, observe: 0, pain: 0, painValue: '', reminder: '', reminderTime: '', alerted: false }]);
+        // 新增後不立即排序，避免輸入中斷，但在離開焦點時觸發
+    };
+
     const removeRow = (id: number) => setHandoverList(prev => prev.filter(item => item.id !== id));
 
     const addExam = () => {
@@ -50,7 +64,10 @@ const HandoverModal: React.FC<Props> = ({ onClose, handoverList, setHandoverList
                     <section>
                         <div className="flex justify-between items-end mb-4">
                             <h4 className="font-bold text-indigo-800 text-lg flex items-center gap-2"><div className="w-1 h-6 bg-indigo-500 rounded-full"></div> 護理作業檢核表</h4>
-                            <button onClick={addRow} className="text-sm flex items-center gap-1 bg-indigo-100/50 text-indigo-700 px-3 py-1.5 rounded-full hover:bg-indigo-200 transition-colors font-bold backdrop-blur-sm"><PlusCircle size={16} /> 新增床位</button>
+                            <div className="flex gap-2">
+                                <button onClick={sortList} className="text-xs flex items-center gap-1 bg-white/60 text-indigo-600 px-3 py-1.5 rounded-full hover:bg-white transition-colors font-bold border border-indigo-100 shadow-sm">排序床號</button>
+                                <button onClick={addRow} className="text-xs flex items-center gap-1 bg-indigo-600 text-white px-3 py-1.5 rounded-full hover:bg-indigo-700 transition-colors font-bold shadow-md"><PlusCircle size={14} /> 新增床位</button>
+                            </div>
                         </div>
                         <div className="bg-white/40 border border-white/50 rounded-2xl overflow-hidden shadow-sm backdrop-blur-sm">
                             <table className="w-full text-sm">
@@ -60,22 +77,61 @@ const HandoverModal: React.FC<Props> = ({ onClose, handoverList, setHandoverList
                                         <th className="p-4 text-center w-20">護理紀錄</th>
                                         <th className="p-4 text-center w-20">身心評估</th>
                                         <th className="p-4 text-center w-24">密切觀察單</th>
-                                        <th className="p-4 text-center w-20">疼痛評估</th>
+                                        <th className="p-4 text-center w-32">疼痛評估</th>
                                         <th className="p-4 text-left">提醒/交班事項</th>
-                                        <th className="p-4 text-left w-32">提醒(前5分)</th>
+                                        <th className="p-4 text-left w-36">提醒(前5分)</th>
                                         <th className="p-4 w-12 rounded-tr-2xl"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {handoverList.map(row => (
                                         <tr key={row.id} className="border-t border-white/40 hover:bg-white/40 transition-colors">
-                                            <td className="p-3"><input type="text" value={row.bed} onChange={(e) => updateField(row.id, 'bed', e.target.value)} className="w-full p-2 bg-white/50 border border-white/40 rounded-xl focus:ring-2 focus:ring-indigo-300 outline-none text-center font-bold text-slate-700 shadow-sm" placeholder="輸入" /></td>
+                                            <td className="p-3">
+                                                <input 
+                                                    type="text" 
+                                                    value={row.bed} 
+                                                    onChange={(e) => updateField(row.id, 'bed', e.target.value)} 
+                                                    onBlur={sortList}
+                                                    className="w-full p-2 bg-white/50 border border-white/40 rounded-xl focus:ring-2 focus:ring-indigo-300 outline-none text-center font-bold text-slate-700 shadow-sm" 
+                                                    placeholder="床號" 
+                                                />
+                                            </td>
                                             <td className="p-3 text-center"><StatusIcon status={row.record} onClick={() => toggleStatus(row.id, 'record')} /></td>
                                             <td className="p-3 text-center"><StatusIcon status={row.assess} onClick={() => toggleStatus(row.id, 'assess')} /></td>
                                             <td className="p-3 text-center"><StatusIcon status={row.observe} onClick={() => toggleStatus(row.id, 'observe')} /></td>
-                                            <td className="p-3 text-center"><StatusIcon status={row.pain} onClick={() => toggleStatus(row.id, 'pain')} /></td>
+                                            <td className="p-3 text-center">
+                                                <div className="flex flex-col items-center gap-1">
+                                                    <StatusIcon status={row.pain} onClick={() => toggleStatus(row.id, 'pain')} />
+                                                    <input 
+                                                        type="text" 
+                                                        value={row.painValue || ''} 
+                                                        onChange={(e) => updateField(row.id, 'painValue', e.target.value)} 
+                                                        className="w-full text-[10px] p-1 bg-white/40 border border-white/30 rounded focus:ring-1 focus:ring-pink-300 outline-none text-center text-slate-600" 
+                                                        placeholder="分/性質" 
+                                                    />
+                                                </div>
+                                            </td>
                                             <td className="p-3"><input type="text" value={row.reminder} onChange={(e) => updateField(row.id, 'reminder', e.target.value)} className="w-full p-2 bg-white/50 border border-white/40 rounded-xl focus:ring-2 focus:ring-indigo-300 outline-none text-slate-700" placeholder="輸入交班事項..." /></td>
-                                            <td className="p-3"><div className="flex items-center gap-2 bg-white/50 rounded-xl border border-white/40 p-1"><Clock size={16} className="text-slate-400 ml-1" /><input type="time" value={row.reminderTime} onChange={(e) => updateField(row.id, 'reminderTime', e.target.value)} className="w-full bg-transparent outline-none text-slate-700 text-sm font-medium" /></div></td>
+                                            <td className="p-3">
+                                                <div className="flex items-center gap-1 bg-white/50 rounded-xl border border-white/40 p-1 group">
+                                                    <Clock size={14} className="text-slate-400 ml-1" />
+                                                    <input 
+                                                        type="time" 
+                                                        value={row.reminderTime} 
+                                                        onChange={(e) => updateField(row.id, 'reminderTime', e.target.value)} 
+                                                        className="flex-grow bg-transparent outline-none text-slate-700 text-xs font-medium" 
+                                                    />
+                                                    {row.reminderTime && (
+                                                        <button 
+                                                            onClick={() => updateField(row.id, 'reminderTime', '')} 
+                                                            className="p-1 text-slate-300 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                                                            title="清空時間"
+                                                        >
+                                                            <Eraser size={12} />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </td>
                                             <td className="p-3 text-center"><button onClick={() => removeRow(row.id)} className="text-slate-400 hover:text-red-500 transition-colors"><MinusCircle size={20} /></button></td>
                                         </tr>
                                     ))}
