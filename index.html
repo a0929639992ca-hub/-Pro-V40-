@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>精神科護理通 Pro V41.9 れんと</title>
+    <title>精神科護理通 Pro V42.0 れんと</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -28,6 +28,12 @@
                 radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
             background-size: 200% 200%;
             animation: mesh-flow 20s ease infinite;
+        }
+
+        @keyframes mesh-flow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
         
         .liquid-orb-1 {
@@ -73,6 +79,20 @@
         }
         .animate-fade-in {
             animation: fade-in 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        /* 警報閃爍特效 */
+        @keyframes alarm-flash {
+            0% { box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0); }
+            50% { box-shadow: inset 0 0 100px 20px rgba(239, 68, 68, 0.2); }
+            100% { box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .animate-alarm-flash {
+            animation: alarm-flash 1.5s infinite ease-in-out;
+            pointer-events: none;
+            position: fixed;
+            inset: 0;
+            z-index: 55;
         }
 
         .glass-panel {
