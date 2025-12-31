@@ -10,7 +10,7 @@ import { WEEKDAY_REMINDERS, SHIFT_SETTINGS, COMMON_A_OPTIONS, COMMON_R_OPTIONS, 
 import { ShiftType, ExamItem, HandoverItem } from './types';
 import { polishNursingNote, suggestNursingActions } from './services/geminiService';
 
-const PsychNursingProV42_0 = () => {
+const PsychNursingProV42_1 = () => {
   const [selectedFocus, setSelectedFocus] = useState('discharge_planning');
   const [selectedMSE, setSelectedMSE] = useState<string[]>([]);
   const [selectedSubjective, setSelectedSubjective] = useState<string[]>([]);
@@ -59,7 +59,7 @@ const PsychNursingProV42_0 = () => {
   // 分頁標題閃爍邏輯
   useEffect(() => {
     let interval: any = null;
-    const originalTitle = "精神科護理通 Pro V42.0 れんと";
+    const originalTitle = "精神科護理通 Pro V42.1 れんと";
     const alertTitle = "⚠️【重要提醒】⚠️";
     let showOriginal = true;
 
@@ -357,7 +357,7 @@ const PsychNursingProV42_0 = () => {
           <div className="px-6 py-3 flex items-center justify-between gap-6">
             <div className="flex items-center gap-3 shrink-0">
                 <div className="bg-gradient-to-tr from-green-400 to-teal-500 p-2 rounded-xl shadow-lg shadow-green-500/20"><Stethoscope className="text-white w-6 h-6" /></div>
-                <div><h1 className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600 hidden md:block">精神科護理通</h1><span className="text-[10px] font-bold tracking-widest uppercase text-slate-400 hidden md:block">Pro V42.0 れんと</span></div>
+                <div><h1 className="font-bold text-xl bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600 hidden md:block">精神科護理通</h1><span className="text-[10px] font-bold tracking-widest uppercase text-slate-400 hidden md:block">Pro V42.1 れんと</span></div>
             </div>
             <div className="flex items-center gap-3 flex-grow max-w-2xl min-w-0">
                 <div className="relative flex-grow">
@@ -382,7 +382,6 @@ const PsychNursingProV42_0 = () => {
              {showInputBox ? (
                  <div className="p-6 flex flex-col gap-5 h-full overflow-y-auto custom-scrollbar">
                      <h3 className="font-bold text-lg text-blue-700 flex items-center gap-2 px-1"><User size={20} className="text-blue-500"/> 基本資料與處置</h3>
-                     {/* ... (其餘 UI 維持不變) */}
                      {['leave_absence', 'visitation', 'send_exam', 'admission_care'].includes(selectedFocus) || (selectedFocus === 'other_symptoms' && otherSymptomType === 'rtms') ? (
                          <div className="space-y-4 bg-white/30 p-4 rounded-2xl border border-white/40">
                              <input value={visitorName} onChange={e=>setVisitorName(e.target.value)} className="glass-input p-3 rounded-xl text-base w-full font-bold" placeholder="稱謂 (媽媽、哥哥)..."/>
@@ -397,9 +396,71 @@ const PsychNursingProV42_0 = () => {
                          </div>
                      )}
                  </div>
+             ) : selectedFocus === 'restraint_limbs' ? (
+                <div className="p-6 flex flex-col gap-6 h-full overflow-y-auto custom-scrollbar animate-fade-in">
+                    <h3 className="font-bold text-xl text-orange-700 flex items-center gap-3 border-b border-orange-200 pb-3">
+                        <div className="bg-orange-100 p-2 rounded-xl"><Lock size={22} className="text-orange-600"/></div> 約束保護專屬處置
+                    </h3>
+                    
+                    {/* 約束原因 */}
+                    <div className="bg-white/40 p-5 rounded-2xl border border-orange-100/50 shadow-sm space-y-4">
+                        <div className="flex items-center justify-between">
+                            <h4 className="text-sm font-bold text-orange-800 uppercase tracking-widest flex items-center gap-2"><div className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse"></div> 約束原因</h4>
+                            <span className="text-[10px] font-black text-white bg-orange-500 px-2 py-0.5 rounded-full">STEP 1</span>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                            {NANDA_FOCUS_DATA.restraint_limbs.reasons?.map(r => (
+                                <button key={r} onClick={() => setRestraintReason(r)} className={`text-sm px-4 py-2 rounded-xl border transition-all font-bold ${restraintReason === r ? 'bg-orange-600 text-white shadow-lg border-orange-500 scale-105' : 'bg-white/60 text-orange-700 border-orange-200 hover:bg-orange-50'}`}>
+                                    {r}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* 約束種類與部位 */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="bg-white/40 p-5 rounded-2xl border border-orange-100/50 shadow-sm space-y-4">
+                            <h4 className="text-sm font-bold text-orange-800 uppercase tracking-widest flex items-center gap-2">種類</h4>
+                            <div className="flex flex-wrap gap-2">
+                                {['自願性', '非自願性'].map(t => (
+                                    <button key={t} onClick={() => setRestraintType(t)} className={`flex-1 text-sm px-4 py-2 rounded-xl border transition-all font-bold ${restraintType === t ? 'bg-orange-600 text-white shadow-lg border-orange-500' : 'bg-white/60 text-orange-700 border-orange-200 hover:bg-orange-50'}`}>
+                                        {t}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="bg-white/40 p-5 rounded-2xl border border-orange-100/50 shadow-sm space-y-4">
+                            <h4 className="text-sm font-bold text-orange-800 uppercase tracking-widest flex items-center gap-2">部位</h4>
+                            <div className="flex flex-wrap gap-2">
+                                {NANDA_FOCUS_DATA.restraint_limbs.scopes?.map(s => (
+                                    <button key={s} onClick={() => setRestraintScope(s)} className={`text-[11px] px-3 py-2 rounded-xl border transition-all font-bold ${restraintScope === s ? 'bg-orange-600 text-white shadow-lg border-orange-500' : 'bg-white/60 text-orange-700 border-orange-200 hover:bg-orange-50'}`}>
+                                        {s}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* D 紀錄模板 */}
+                    <div className="space-y-3 mt-2">
+                        <h4 className="text-sm font-bold text-slate-500 px-1">點選下方模板加入 D 紀錄:</h4>
+                        <div className="grid grid-cols-1 gap-2">
+                            {NANDA_FOCUS_DATA.restraint_limbs.d_templates?.map((t, i) => (
+                                <button key={i} onClick={() => addText('D', t)} className="text-sm text-left w-full p-4 bg-white/50 border border-white/60 rounded-2xl hover:bg-orange-50 hover:border-orange-200 hover:shadow-md transition-all text-slate-700 font-medium leading-relaxed group relative overflow-hidden">
+                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-orange-400 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                    {t.replace(/○○/g, restraintReason).replace(/△△/g, restraintType).replace(/□□/g, restraintScope)}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+             ) : selectedFocus === 'risk_falls' || selectedFocus === 'sleep_pattern' ? (
+                 <div className="p-6 flex flex-col gap-4 h-full overflow-y-auto custom-scrollbar">
+                     <h3 className={`font-bold text-lg flex items-center gap-2 ${selectedFocus==='risk_falls'?'text-red-700':'text-indigo-700'}`}>{selectedFocus==='risk_falls'?<AlertTriangle size={20}/>:<Moon size={20}/>} {selectedFocus==='risk_falls'?'跌倒風險評估':'睡眠型態評估'}</h3>
+                     <div className="flex-1 space-y-2">{(selectedFocus==='risk_falls'?NANDA_FOCUS_DATA.risk_falls:NANDA_FOCUS_DATA.sleep_pattern).d_options?.map(o => <button key={o} onClick={()=>toggle(o, selectedFocus==='risk_falls'?fallsD:sleepD, selectedFocus==='risk_falls'?setFallsD:setSleepD)} className={`text-sm text-left w-full p-3 rounded-xl border transition-all ${(selectedFocus==='risk_falls'?fallsD:sleepD).includes(o)?'bg-slate-700 text-white border-slate-600 shadow-md':'bg-white/40 border-white/40 hover:bg-white/60'}`}>{o.replace(/○○：○○/g, formatTimeForDoc(selectedFocus==='sleep_pattern'?customSleepTime:customWakeTime))}</button>)}</div>
+                 </div>
              ) : (
                 <div className="flex flex-col flex-1 min-h-0">
-                    {/* ... (評估面板內容) */}
                     <div className="p-4 shrink-0 pb-0">
                         {selectedFocus === 'discharge_planning' && (
                            <div className="mb-4 bg-violet-50/80 p-4 rounded-2xl border border-violet-200 flex items-center justify-between shadow-sm animate-fade-in">
@@ -477,4 +538,4 @@ const PsychNursingProV42_0 = () => {
   );
 };
 
-export default PsychNursingProV42_0;
+export default PsychNursingProV42_1;
